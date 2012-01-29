@@ -5,13 +5,18 @@ import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.ui.activity.BaseGameActivity;
 import org.anddev.andengine.util.modifier.IModifier;
 
-
+/*
+ * You guessed, utility functions.
+ */
 public class Utils {
 	// ===========================================================
 	// Static
 	// ===========================================================
 
-	public static IEntityModifierListener detacherListenerFactory(final BaseGameActivity activity, final Scene scene, final Character entity)
+	/*
+	 * Returns an EntityModifierListener that destroys the character [cha] at the end of a modifier.  
+	 */
+	public static IEntityModifierListener detacherListenerFactory(final BaseGameActivity activity, final Scene scene, final Character cha)
 	{
 		return new IEntityModifierListener() {
 			public void onModifierStarted(final IModifier<IEntity> pModifier, final IEntity pItem) { }
@@ -23,8 +28,7 @@ public class Utils {
 				activity.runOnUpdateThread(new Runnable() {
 					@Override
 					public void run() {
-						scene.detachChild(entity);
-						entity.destroy();
+						cha.destroy();
 					}
 				});	
 			}

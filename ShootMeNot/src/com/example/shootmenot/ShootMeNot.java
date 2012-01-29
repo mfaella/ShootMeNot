@@ -11,11 +11,16 @@ import org.anddev.andengine.entity.scene.background.ParallaxBackground.ParallaxE
 import org.anddev.andengine.entity.sprite.AnimatedSprite;
 import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.entity.util.FPSLogger;
+import org.anddev.andengine.opengl.font.Font;
 import org.anddev.andengine.opengl.texture.TextureOptions;
 import org.anddev.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas;
 import org.anddev.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlasTextureRegionFactory;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.opengl.texture.region.TiledTextureRegion;
+
+import android.graphics.Color;
+import android.graphics.Typeface;
+import android.util.Log;
 
 /**
  * (c) 2011 Marco Faella
@@ -45,7 +50,10 @@ public class ShootMeNot extends GameActivity {
 	
 	private BitmapTextureAtlas mainAtlas;
 	private BitmapTextureAtlas backgroundAtlas;
+	private BitmapTextureAtlas mFontAtlas, mStrokeFontAtlas;
 
+	private Font mFont;
+	
 	private TextureRegion mParallaxLayerBack;
 	private TextureRegion mParallaxLayerMid;
 	private TextureRegion mParallaxLayerFront;
@@ -69,12 +77,14 @@ public class ShootMeNot extends GameActivity {
 
 	@Override
 	public Engine onLoadEngine() {
+		Log.d("SMN", "onLoadEngine");
 		this.mCamera = new Camera(0, 0, CAMERA_WIDTH, CAMERA_HEIGHT);
 		return new Engine(new EngineOptions(true, ScreenOrientation.PORTRAIT, new RatioResolutionPolicy(CAMERA_WIDTH, CAMERA_HEIGHT), this.mCamera));
 	}
 
 	@Override
 	public void onLoadResources() {
+		Log.d("SMN", "onLoadResources");
 		BitmapTextureAtlasTextureRegionFactory.setAssetBasePath("gfx/");
 		
 		this.mainAtlas = new BitmapTextureAtlas(512, 256, TextureOptions.BILINEAR_PREMULTIPLYALPHA);
@@ -86,6 +96,12 @@ public class ShootMeNot extends GameActivity {
 
 		this.mEngine.getTextureManager().loadTextures(mainAtlas, backgroundAtlas);
 		
+		this.mFontAtlas = new BitmapTextureAtlas(256, 256, TextureOptions.BILINEAR_PREMULTIPLYALPHA);
+		this.mStrokeFontAtlas = new BitmapTextureAtlas(256, 256, TextureOptions.BILINEAR_PREMULTIPLYALPHA); // currently unused
+		this.mFont = new Font(mFontAtlas, Typeface.create(Typeface.DEFAULT, Typeface.BOLD), 20, true, Color.BLACK);
+		this.mEngine.getTextureManager().loadTexture(mFontAtlas);
+		this.mEngine.getFontManager().loadFont(mFont);
+		
 		// Pass textures to the appropriate classes
 		Protagonist.setTexture(BitmapTextureAtlasTextureRegionFactory.createFromAsset(mainAtlas, this, "tank.png", 0, 0));
 		GoodBullet.setTexture(BitmapTextureAtlasTextureRegionFactory.createFromAsset(mainAtlas, this, "particle_fire.png", 100, 0));
@@ -95,6 +111,7 @@ public class ShootMeNot extends GameActivity {
 
 	@Override
 	public Scene onLoadScene() {
+		Log.d("SMN", "onLoadScene");
 		this.mEngine.registerUpdateHandler(new FPSLogger());
 
 		scene = new Scene();
@@ -107,18 +124,29 @@ public class ShootMeNot extends GameActivity {
 		// start the game
 		GameContext context = new GameContext(this, mCamera, mEngine, scene);
 		prot = Protagonist.factory(context);
+		LifeIndicator li = new LifeIndicator(context, prot);
+		ScoreIndicator si = new ScoreIndicator(context, prot, mFont);
+		scene.registerUpdateHandler(new CollisionHandler(prot));
+		scene.registerUpdateHandler(new IndicatorsHandler(li, si));
 		LevelDirectory dir = new LevelDirectory(context);
 		Level l = dir.get(0);
 		l.play(context);
-	
+		
 		return scene;
 	}
 
 	@Override
 	public void onLoadComplete() {
+		Log.d("SMN", "onLoadComplete");
+		
 		// NOP
 	}
 
+	@Override
+	protected void onResume() {
+		super.onResume();
+		Log.d("SMN", "Resuming!");
+	}
 	// ===========================================================
 	// Methods
 	// ===========================================================

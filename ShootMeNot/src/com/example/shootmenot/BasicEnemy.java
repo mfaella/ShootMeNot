@@ -10,7 +10,9 @@ public class BasicEnemy extends Enemy {
 	
 	private static TextureRegion tr;
 	private static final float SPEED = 100; // pixels per second 
-	private static final int LIFE = 100; // life points 
+	private static final int LIFE = 20;    // life points 
+	private static final int DAMAGE = 20;   // damage inflicted on collision 
+	private static final int SCOREVALUE = 20; 
 	
 	public static void setTexture(TextureRegion tr) {
 		BasicEnemy.tr = tr;
@@ -22,6 +24,6 @@ public class BasicEnemy extends Enemy {
 	
 	public BasicEnemy(GameContext context, float x, float y) 
 	{
-		super(context, x, y, tr, LIFE, Enemy.ShootEnum.STRAIGHT, 0.8f);
+		super(context, x, y, tr, LIFE, DAMAGE, SCOREVALUE, Enemy.ShootEnum.STRAIGHT, 0.8f);
 	}
 }

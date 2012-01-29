@@ -1,13 +1,11 @@
 package com.example.shootmenot;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-
-import org.anddev.andengine.entity.modifier.EntityModifier;
 import org.anddev.andengine.entity.modifier.IEntityModifier;
-import org.anddev.andengine.entity.scene.Scene;
-import org.anddev.andengine.ui.activity.BaseGameActivity;
 
+/*
+ * The event consisting in the addition of a new character.
+ */
 public class CharacterEvent implements LevelEvent {
 	
 	private Class<? extends Character> characterClass; 
@@ -43,12 +41,16 @@ public class CharacterEvent implements LevelEvent {
 	}
 	
 	public static class MissingConstructorException extends RuntimeException {
+		static final long serialVersionUID = 1;
+		
 		public MissingConstructorException(Class<?> c) 
 		{
 			super("Class " + c.getName() + " should have a constructor accepting two floats (initial coordinates).");
 		}
 	}
 	public static class WrongConstructorException extends RuntimeException {
+		static final long serialVersionUID = 1;
+		
 		public WrongConstructorException(Class<?> c, Exception e) 
 		{
 			super("Error while reflectively calling the constructor of class " + c.getName() + ". Actual exception was:" + e);

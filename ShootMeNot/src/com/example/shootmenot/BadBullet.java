@@ -7,6 +7,8 @@ import org.anddev.andengine.opengl.texture.region.TextureRegion;
 public class BadBullet extends Character {
 	private static TextureRegion tr;
 	private static final float SPEED = 300; // pixels per second 
+	private static final int DAMAGE = 6; // inflicted damage 
+	private static final int SCOREVALUE = 0; 
 	
 	public static void setTexture(TextureRegion tr) {
 		BadBullet.tr = tr;
@@ -14,14 +16,14 @@ public class BadBullet extends Character {
 	
 	/* A bullet which goes straight down */
 	public BadBullet(GameContext context, float x0, float y0) {
-		super(context, x0, y0, tr);
+		super(context, x0, y0, tr, Character.DIEONTOUCH, DAMAGE, SCOREVALUE);
 		// TEMPORARY
 		setScale(0.6f);
 		float y1 = context.camera.getHeight() + this.getHeight();
 		float distance = y1 - y0;
 		float duration = distance / SPEED;
 		
-		MoveModifier mod = new MoveModifier(duration, x0, x0, y0, y1);
+		MoveModifier mod = new MoveModifier(duration, x0, x0, y0, y1, new DestroyModifierListener(context, this));
 		this.registerEntityModifier(mod);
 		context.scene.attachChild(this);
 	}
@@ -32,6 +34,6 @@ public class BadBullet extends Character {
 	 * TO BE DONE.
 	 */
 	public BadBullet(GameContext context, float x0, float y0, float heading) {
-		super(context, x0, y0, tr);
+		super(context, x0, y0, tr, Character.DIEONTOUCH, DAMAGE, SCOREVALUE);
 	}
 }

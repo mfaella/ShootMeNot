@@ -1,34 +1,35 @@
 package com.example.shootmenot;
 
-import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.handler.timer.ITimerCallback;
 import org.anddev.andengine.engine.handler.timer.TimerHandler;
-import org.anddev.andengine.entity.scene.Scene;
-import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.input.touch.TouchEvent;
-import org.anddev.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas;
-import org.anddev.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlasTextureRegionFactory;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
-import org.anddev.andengine.ui.activity.BaseGameActivity;
-
-import android.app.Activity;
 
 /*
  * The character controlled by the player.
  * This is a singleton class.
  */
-public class Protagonist extends Sprite {
+public class Protagonist extends Character {
 
+	private static final int LIFE = 300;
+	private static final int DAMAGE = 30; // damage inflicted on collision
+	private static final int SCOREVALUE = 0; // value for suicide?
+		
 	private static Protagonist it;
 	private static TextureRegion tr;
-	private GameContext context;
+
+	private int score;
+	private int maxLife;
+	private float shootDelay; // seconds between shots
 	
 	private Protagonist(GameContext context, TextureRegion tr)
 	{
-		super(200, 400, tr);
-		this.context = context;
+		super(context, 200, 400, tr, LIFE, DAMAGE, SCOREVALUE);
 		
-		setScale(0.5f);
+		maxLife = LIFE;
+		shootDelay = 0.4f;
+		
+		setScale(0.45f);
 		context.scene.attachChild(this);
 		context.scene.registerTouchArea(this);
 		context.scene.setTouchAreaBindingEnabled(true);
@@ -60,10 +61,9 @@ public class Protagonist extends Sprite {
 	
 	private void startShooting() {
 		TimerHandler spriteTimerHandler;
-		float delay = 0.5f; // seconds
-
+		
 		// a Time Handler for spawning bullets, periodically
-		spriteTimerHandler = new TimerHandler(delay, true,
+		spriteTimerHandler = new TimerHandler(shootDelay, true,
 				new ITimerCallback() {
 					@Override
 					public void onTimePassed(TimerHandler pTimerHandler) {
@@ -72,4 +72,15 @@ public class Protagonist extends Sprite {
 				});
 		context.engine.registerUpdateHandler(spriteTimerHandler);
 	}
+	
+	public long getScore() { return score; }
+	
+	public void incrScore(long incr) {
+		score += incr;
+		if (score<0) score = 0;
+	}
+	
+	public int getMaxLife() { return maxLife; }
+	
+	public void setMaxLife(int maxLife) { this.maxLife = maxLife; }
 }
