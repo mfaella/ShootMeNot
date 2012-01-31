@@ -123,7 +123,7 @@ public class ShootMeNot extends GameActivity {
 	
 		// start the game
 		GameContext context = new GameContext(this, mCamera, mEngine, scene);
-		prot = Protagonist.factory(context);
+		prot = new Protagonist(context);
 		LifeIndicator li = new LifeIndicator(context, prot);
 		ScoreIndicator si = new ScoreIndicator(context, prot, mFont);
 		scene.registerUpdateHandler(new CollisionHandler(prot));

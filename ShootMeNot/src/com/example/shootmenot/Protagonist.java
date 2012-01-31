@@ -1,13 +1,15 @@
 package com.example.shootmenot;
 
+import org.anddev.andengine.engine.handler.IUpdateHandler;
 import org.anddev.andengine.engine.handler.timer.ITimerCallback;
 import org.anddev.andengine.engine.handler.timer.TimerHandler;
 import org.anddev.andengine.input.touch.TouchEvent;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
 
+import android.util.Log;
+
 /*
  * The character controlled by the player.
- * This is a singleton class.
  */
 public class Protagonist extends Character {
 
@@ -15,14 +17,29 @@ public class Protagonist extends Character {
 	private static final int DAMAGE = 30; // damage inflicted on collision
 	private static final int SCOREVALUE = 0; // value for suicide?
 		
+	private static final float KEEP_SPEED = 0.9f, CHANGE_SPEED = 2.0f, MAX_SPEED = 20.0f;
 	private static Protagonist it;
 	private static TextureRegion tr;
 
+	public static void setTexture(TextureRegion tr)
+	{
+		Protagonist.tr = tr;
+	}
+	
+	public static Protagonist factory(GameContext context) 
+	{
+		if (it==null) {
+			it = new Protagonist(context);
+		}
+		return it;
+	}
+		
 	private int score;
 	private int maxLife;
+	private float velX, velY;
 	private float shootDelay; // seconds between shots
 	
-	private Protagonist(GameContext context, TextureRegion tr)
+	public Protagonist(GameContext context)
 	{
 		super(context, 200, 400, tr, LIFE, DAMAGE, SCOREVALUE);
 		
@@ -34,6 +51,7 @@ public class Protagonist extends Character {
 		context.scene.registerTouchArea(this);
 		context.scene.setTouchAreaBindingEnabled(true);
 	
+		context.scene.registerUpdateHandler(getProtagonistMovementHandler());
 		startShooting();		
 	}
 	
@@ -42,21 +60,41 @@ public class Protagonist extends Character {
 							     final float pTouchAreaLocalX,
 							     final float pTouchAreaLocalY)
 	{
-		this.setPosition(pSceneTouchEvent.getX() - this.getWidth() / 2, pSceneTouchEvent.getY() - this.getHeight() / 2);
+		float centerX = getX() + getWidth() / 2,
+			  centerY = getY() + getHeight() / 2;
+		float deltaX = pSceneTouchEvent.getX() - centerX, 
+			  deltaY = pSceneTouchEvent.getY() - centerY;
+		velX += deltaX*CHANGE_SPEED;
+		velY += deltaY*CHANGE_SPEED;
+		
+		if (velX>MAX_SPEED) velX = MAX_SPEED;
+		else if (velX<-MAX_SPEED) velX = -MAX_SPEED;
+		if (velY>MAX_SPEED) velY = MAX_SPEED;
+		else if (velY<-MAX_SPEED) velY = -MAX_SPEED;
+		
+		// was: this.setPosition(pSceneTouchEvent.getX() - this.getWidth() / 2, pSceneTouchEvent.getY() - this.getHeight() / 2);
 		return true;
 	}
 
-	public static void setTexture(TextureRegion tr)
+	public IUpdateHandler getProtagonistMovementHandler()
 	{
-		Protagonist.tr = tr;
-	}
-	
-	public static Protagonist factory(GameContext context) 
-	{
-		if (it==null) {
-			it = new Protagonist(context, tr);
-		}
-		return it;
+		return new IUpdateHandler() {
+			@Override
+			public void onUpdate(float secondsElapsed) {
+				Log.d("SMN", "seconds: " + secondsElapsed);
+				float posX = Protagonist.this.getX(),
+					  posY = Protagonist.this.getY();
+				
+				Protagonist.this.setPosition(posX + velX*secondsElapsed, posY + velY*secondsElapsed);
+				velX = velX*KEEP_SPEED;
+				velY = velY*KEEP_SPEED;
+			}
+
+			@Override
+			public void reset() {
+				// NOP
+			}
+		};
 	}
 	
 	private void startShooting() {
